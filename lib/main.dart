@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler/questionario.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +27,41 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  Questionario questionario = Questionario();
+
+  List<Icon> respostas = [];
+
+  void verificarResposta(bool gabarito) {
+    bool correctAnswer = questionario.getResposta();
+
+    setState(() {
+      if (questionario.isTerminou() == true) {
+        Alert(
+                context: context,
+                title: "Você chegou ao fim",
+                desc: "Jovem padawan agora é de voltar ao início")
+            .show();
+        questionario.resetar();
+        respostas = [];
+      } else {
+        if (correctAnswer == gabarito) {
+          respostas.add(Icon(
+            Icons.check,
+            color: Colors.green,
+          ));
+          print('Resposta certa');
+        } else {
+          respostas.add(Icon(
+            Icons.close,
+            color: Colors.red,
+          ));
+          print('Resposta errada');
+        }
+        questionario.proximaPergunta();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +74,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                questionario.getPergunta(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -61,6 +98,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
+                verificarResposta(true);
                 //The user picked true.
               },
             ),
@@ -79,12 +117,12 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked false.
+                verificarResposta(false);
               },
             ),
           ),
         ),
-        //TODO: Add a Row here as your score keeper
+        Row(children: respostas)
       ],
     );
   }
